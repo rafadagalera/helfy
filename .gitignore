@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Node / Expo
+node_modules/
+.expo/
+dist/
+
+# Ambiente
+.env
+.env.*
+!.env.example
+
+# Dados gerados em runtime (artefatos do modelo em artifacts/ SÃO versionados)
+services/score-engine/data/raw/
+services/score-engine/data/processed/
+
+# IDE
+.idea/
+.vscode/
