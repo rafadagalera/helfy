@@ -14,6 +14,7 @@
 | Banco | PostgreSQL (Alembic + SQLAlchemy 2) | Padrão de mercado, JSONB para info nutricional, sobe em docker-compose |
 | Mobile | Expo + TypeScript | Setup rápido, expo-camera para barcode, ideal para o prazo |
 | Auth | JWT (python-jose + bcrypt) | Conforme convenção do projeto |
+| Documentação de API | Swagger/OpenAPI gerada automaticamente em toda API | FastAPI gera nativamente; exigência do projeto |
 | Idioma | Código em inglês; commits/comentários em português | Convenção do projeto |
 
 ## 2. Arquitetura
@@ -129,7 +130,9 @@ food_scores      (user_id fk, food_id fk, score numeric(4,3), breakdown jsonb,
                   model_version, computed_at, pk(user_id, food_id))   -- cache
 ```
 
-Invalidação do cache `food_scores`: deletar as linhas do usuário quando o perfil é atualizado (`PUT /perfil`).
+Invalidação do cache `food_scores`:
+- **Por evento:** deletar as linhas do usuário quando o perfil é atualizado (`PUT /perfil`)
+- **Por TTL: 24h** — entradas com `computed_at` mais antigo que 24 horas são tratadas como miss e recalculadas na engine (verificação na leitura; sem job de limpeza na Sprint 1)
 
 ### Base de produtos (SCRUM-14)
 Open Food Facts como fonte. `GET /alimentos/barcode/{codigo}`: busca local primeiro; em miss, consulta a API do OFF, normaliza os campos nutricionais para o formato `nutrition` e os `allergen_flags`/`food_group` usados pela engine, e persiste. Input manual (SCRUM-15) cria `foods` com `source=MANUAL` sem barcode. Timeout/erro do OFF → 502 com mensagem clara; nunca bloqueia o input manual.
@@ -154,14 +157,23 @@ Conforme CLAUDE.md §6: `POST /auth/register`, `POST /auth/login`, `GET/PUT /per
 - **Dados:** React Query para chamadas/cache; JWT em expo-secure-store; cliente API tipado em `src/api/`
 - **Score no cliente:** nunca calculado — apenas exibido (convenção do projeto)
 
-## 7. Testes e CI
+## 7. Documentação de API (Swagger/OpenAPI)
+
+Toda API do monorepo expõe documentação Swagger/OpenAPI **gerada automaticamente** pelo FastAPI:
+
+- `core-api` e `score-engine` servem Swagger UI em `/docs`, ReDoc em `/redoc` e o schema em `/openapi.json`
+- Os modelos Pydantic de request/response levam `description` e `examples` (via `model_config["json_schema_extra"]` ou `Field(examples=...)`) para que o schema gerado seja autoexplicativo — incluindo um exemplo completo de perfil e de resposta de score com breakdown
+- Cada endpoint declara `summary`, `tags` por domínio (auth, profile, foods, pantry, recipes, score) e `response_model` explícito — nada de retornar dicts soltos, senão o schema gerado fica vazio
+- O CI valida que `/openapi.json` é gerado sem erros (teste de smoke via TestClient)
+
+## 8. Testes e CI
 
 - **score-engine:** unit (heurística, mapping, preprocessing) + integração (TestClient, modelo real carregado)
 - **core-api:** unit (regras de sugestão, normalização OFF, invalidação de cache) + integração (TestClient + Postgres via testcontainers ou compose no CI; engine mockada com respx)
 - **mobile:** smoke de renderização das telas principais (jest-expo); E2E fora do escopo da Sprint 1
 - **CI (GitHub Actions):** jobs paralelos por serviço — ruff + pytest; tsc + jest no mobile
 
-## 8. Fases de execução
+## 9. Fases de execução
 
 | Fase | Conteúdo | Tasks SCRUM |
 |---|---|---|
@@ -174,6 +186,6 @@ Conforme CLAUDE.md §6: `POST /auth/register`, `POST /auth/login`, `GET/PUT /per
 
 Fases 3a e 3b são paralelizáveis. A fase 5 pode começar pelo setup de navegação/auth assim que a 3a expõe os endpoints.
 
-## 9. Fora de escopo (Sprint 1)
+## 10. Fora de escopo (Sprint 1)
 
 Notificações, plano semanal, lista de compras, marketplace, telemetria CarePlus (roadmap pós-MVP); retreino automático do modelo; observabilidade além de logging; deploy em nuvem (somente docker-compose local).
