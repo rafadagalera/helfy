@@ -42,6 +42,13 @@ def test_deterministic_without_noise():
     assert a == b
 
 
+def test_maintenance_goal_aligns_high_with_vegetables():
+    # MANTER mapeia para "maintenance" — vegetais/frutas/legumes devem alinhar "high"
+    bd = build_breakdown(_ind(goal="maintenance"), _food(food_group="vegetable"),
+                         heuristic_score=6.0)
+    assert bd["goal_alignment"] == "high"
+
+
 def test_breakdown_structure():
     bd = build_breakdown(_ind(allergy_nuts=1), _food(contains_nuts=1), heuristic_score=0.0)
     assert bd["allergen_safe"] is False

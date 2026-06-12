@@ -35,7 +35,7 @@ def build_breakdown(ind: pd.Series, food: pd.Series, heuristic_score: float) -> 
         goal_alignment = "high"
     elif goal == "weight_loss" and energy < 200 and fiber > 3:
         goal_alignment = "high"
-    elif goal == "health_improvement" and food.get("food_group") in ("vegetable", "fruit", "legume"):
+    elif goal == "maintenance" and food.get("food_group") in ("vegetable", "fruit", "legume"):
         goal_alignment = "high"
     elif heuristic_score >= 7:
         goal_alignment = "moderate"
