@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from core_api.db.models import Food, PantryItem, Profile, Recipe
-from core_api.scoring.engine_client import EngineUnavailableError
+from core_api.scoring.engine_client import EngineContractError, EngineUnavailableError
 from core_api.scoring.service import get_scores
 
 COVERAGE_THRESHOLD = 0.7
@@ -43,9 +43,11 @@ def suggest_recipes(db: Session, profile: Profile, limit: int = 10) -> dict:
     scored = True
     needed_ids = {fid for _, present, _, _ in candidates for fid in present}
     foods = db.scalars(select(Food).where(Food.id.in_(needed_ids))).all()
+    # Qualquer falha da engine (fora do ar ou contrato quebrado) degrada para
+    # ordenação por cobertura — sugestão de receitas nunca retorna 5xx por causa do score
     try:
         scores = get_scores(db, profile, foods)
-    except EngineUnavailableError:
+    except (EngineUnavailableError, EngineContractError):
         scored = False
         scores = {}
 

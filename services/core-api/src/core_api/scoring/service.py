@@ -12,7 +12,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
 from core_api.db.models import Food, FoodScore, Profile
-from core_api.scoring.engine_client import EngineUnavailableError, score_foods
+from core_api.scoring.engine_client import EngineContractError, score_foods
 from core_api.settings import settings
 
 
@@ -52,20 +52,22 @@ def get_scores(db: Session, profile: Profile, foods: list[Food]) -> dict[str, di
     if missing:
         engine_result = score_foods(profile, missing)
         now = datetime.now(timezone.utc)
+        rows = []
         for food in missing:
             item = engine_result["by_food"].get(str(food.id))
             if item is None:
-                raise EngineUnavailableError(f"Engine did not return score for food {food.id}")
+                raise EngineContractError(f"Engine did not return score for food {food.id}")
             result[str(food.id)] = {"score": item["score"], "breakdown": item["breakdown"]}
-            stmt = pg_insert(FoodScore).values(
-                user_id=user_id, food_id=food.id, score=item["score"],
-                breakdown=item["breakdown"],
-                model_version=engine_result["model_version"], computed_at=now,
-            ).on_conflict_do_update(
-                index_elements=[FoodScore.user_id, FoodScore.food_id],
-                set_={"score": item["score"], "breakdown": item["breakdown"],
-                      "model_version": engine_result["model_version"], "computed_at": now},
-            )
-            db.execute(stmt)
+            rows.append({"user_id": user_id, "food_id": food.id, "score": item["score"],
+                         "breakdown": item["breakdown"],
+                         "model_version": engine_result["model_version"], "computed_at": now})
+        stmt = pg_insert(FoodScore).values(rows)
+        stmt = stmt.on_conflict_do_update(
+            index_elements=[FoodScore.user_id, FoodScore.food_id],
+            set_={"score": stmt.excluded.score, "breakdown": stmt.excluded.breakdown,
+                  "model_version": stmt.excluded.model_version,
+                  "computed_at": stmt.excluded.computed_at},
+        )
+        db.execute(stmt)
         db.commit()
     return result

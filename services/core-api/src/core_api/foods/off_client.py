@@ -10,9 +10,11 @@ from core_api.settings import settings
 
 logger = logging.getLogger(__name__)
 
+# en:fish fica de fora de propósito: alergia a peixe ≠ alergia a crustáceos, e o
+# vocabulário da engine não tem "fish" como alérgeno — marcar errado é pior que omitir
 OFF_ALLERGEN_MAP = {
     "en:gluten": "gluten", "en:milk": "lactose", "en:nuts": "nuts",
-    "en:peanuts": "nuts", "en:crustaceans": "shellfish", "en:fish": "shellfish",
+    "en:peanuts": "nuts", "en:crustaceans": "shellfish",
     "en:eggs": "eggs", "en:soybeans": "soy",
 }
 
