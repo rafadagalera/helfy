@@ -7,7 +7,7 @@ App mobile de alimentação saudável personalizada por IA — FIAP Challenge / 
 | Caminho | O que é |
 |---|---|
 | `apps/mobile/` | App React Native (Expo) — Plano 3 |
-| `services/core-api/` | API de produto: auth, perfil, alimentos, dispensa, receitas — Plano 2 |
+| `services/core-api/` | API de produto: auth, perfil, alimentos, dispensa, receitas |
 | `services/score-engine/` | Engine de score nutricional (ML, stateless) |
 | `docs/` | Specs, planos e documentação técnica |
 
