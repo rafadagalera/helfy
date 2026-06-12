@@ -24,6 +24,11 @@ def _to_out(food: Food) -> FoodOut:
 @router.get("/barcode/{codigo}", response_model=FoodOut,
             summary="Busca alimento por código de barras (cache local → Open Food Facts)")
 def get_by_barcode(codigo: str, db: Session = Depends(get_db)) -> FoodOut:
+    """Busca o alimento pelo código de barras EAN/UPC.
+    Consulta primeiro o banco local; se não encontrar, busca na API Open Food Facts
+    e persiste o resultado para requisições futuras.
+    Retorna 404 se o código não for encontrado; 502 se o Open Food Facts estiver indisponível.
+    """
     food = db.scalar(select(Food).where(Food.barcode == codigo))
     if food is not None:
         return _to_out(food)
@@ -45,6 +50,9 @@ def get_by_barcode(codigo: str, db: Session = Depends(get_db)) -> FoodOut:
 @router.post("", response_model=FoodOut, status_code=201,
              summary="Cadastra alimento manualmente")
 def create_manual(body: FoodManualIn, db: Session = Depends(get_db)) -> FoodOut:
+    """Cadastra um alimento com informações nutricionais fornecidas manualmente (SCRUM-15).
+    Útil quando o produto não está disponível na base Open Food Facts.
+    """
     food = Food(name=body.name, food_group=body.food_group, nutrition=body.nutrition,
                 allergen_flags=body.allergen_flags, flags=body.flags, source="MANUAL")
     db.add(food)
@@ -54,6 +62,7 @@ def create_manual(body: FoodManualIn, db: Session = Depends(get_db)) -> FoodOut:
 
 @router.get("/{alimento_id}", response_model=FoodOut, summary="Busca alimento por id")
 def get_by_id(alimento_id: uuid.UUID, db: Session = Depends(get_db)) -> FoodOut:
+    """Retorna os dados de um alimento pelo seu UUID. Retorna 404 se não encontrado."""
     food = db.get(Food, alimento_id)
     if food is None:
         raise HTTPException(status_code=404, detail="Alimento não encontrado")

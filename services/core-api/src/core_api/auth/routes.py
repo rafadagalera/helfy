@@ -14,6 +14,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.post("/register", response_model=UserOut, status_code=201,
              summary="Cria um usuário")
 def register(body: RegisterIn, db: Session = Depends(get_db)) -> UserOut:
+    """Registra um novo usuário no sistema. Retorna 409 se o e-mail já estiver em uso."""
     exists = db.scalar(select(User).where(User.email == body.email))
     if exists:
         raise HTTPException(status_code=409, detail="E-mail já cadastrado")
@@ -25,6 +26,9 @@ def register(body: RegisterIn, db: Session = Depends(get_db)) -> UserOut:
 
 @router.post("/login", response_model=TokenOut, summary="Autentica e retorna JWT")
 def login(body: LoginIn, db: Session = Depends(get_db)) -> TokenOut:
+    """Autentica o usuário e retorna um Bearer token JWT (validade: 24h).
+    Retorna 401 se as credenciais forem inválidas.
+    """
     user = db.scalar(select(User).where(User.email == body.email))
     if user is None or not verify_password(body.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Credenciais inválidas")
@@ -33,4 +37,5 @@ def login(body: LoginIn, db: Session = Depends(get_db)) -> TokenOut:
 
 @router.get("/me", response_model=UserOut, summary="Usuário autenticado")
 def me(user: User = Depends(get_current_user)) -> UserOut:
+    """Retorna os dados do usuário identificado pelo Bearer token no header Authorization."""
     return UserOut(id=str(user.id), email=user.email, name=user.name)

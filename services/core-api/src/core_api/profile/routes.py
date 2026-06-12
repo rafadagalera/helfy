@@ -25,6 +25,7 @@ def _to_out(profile: Profile) -> ProfileOut:
 @router.get("/{usuario_id}", response_model=ProfileOut, summary="Retorna o perfil")
 def get_profile(usuario_id: uuid.UUID, user: User = Depends(get_current_user),
                 db: Session = Depends(get_db)) -> ProfileOut:
+    """Retorna o perfil de saúde do usuário. Retorna 404 se o perfil ainda não foi cadastrado."""
     require_owner(user, usuario_id)
     profile = db.get(Profile, usuario_id)
     if profile is None:
@@ -37,6 +38,11 @@ def get_profile(usuario_id: uuid.UUID, user: User = Depends(get_current_user),
 def put_profile(usuario_id: uuid.UUID, body: ProfileIn,
                 user: User = Depends(get_current_user),
                 db: Session = Depends(get_db)) -> ProfileOut:
+    """Cria ou atualiza o perfil de saúde do usuário.
+
+    Invalida automaticamente o cache de scores (`food_scores`) para que os próximos
+    cálculos via POST /score reflitam o novo perfil.
+    """
     require_owner(user, usuario_id)
     profile = db.get(Profile, usuario_id)
     if profile is None:
@@ -44,8 +50,6 @@ def put_profile(usuario_id: uuid.UUID, body: ProfileIn,
         db.add(profile)
     for field, value in body.model_dump().items():
         setattr(profile, field, value)
-
-    # Perfil mudou → scores personalizados ficam obsoletos (spec §5)
     db.execute(delete(FoodScore).where(FoodScore.user_id == usuario_id))
     db.commit()
     return _to_out(profile)

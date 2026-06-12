@@ -36,9 +36,10 @@ def _resolve_food(body: PantryAddIn, db: Session) -> Food:
 
 
 @router.get("/{usuario_id}", response_model=list[PantryItemOut],
-            summary="Lista a dispensa do usuário")
+             summary="Lista a dispensa do usuário")
 def list_pantry(usuario_id: uuid.UUID, user: User = Depends(get_current_user),
                 db: Session = Depends(get_db)) -> list[PantryItemOut]:
+    """Retorna todos os alimentos na dispensa digital do usuário, ordenados por nome."""
     require_owner(user, usuario_id)
     rows = db.execute(
         select(PantryItem, Food).join(Food, PantryItem.food_id == Food.id)
@@ -54,6 +55,11 @@ def list_pantry(usuario_id: uuid.UUID, user: User = Depends(get_current_user),
 def add_item(usuario_id: uuid.UUID, body: PantryAddIn,
              user: User = Depends(get_current_user),
              db: Session = Depends(get_db)) -> PantryItemOut:
+    """Adiciona um alimento à dispensa digital do usuário.
+    Se o alimento já estiver na dispensa, atualiza a quantidade (upsert).
+    Aceita `alimento_id` (UUID) OU `codigo_barras` — não ambos.
+    Se fornecido um código de barras, busca o produto via Open Food Facts.
+    """
     require_owner(user, usuario_id)
     food = _resolve_food(body, db)
     item = db.get(PantryItem, (usuario_id, food.id))
@@ -70,6 +76,7 @@ def add_item(usuario_id: uuid.UUID, body: PantryAddIn,
 def remove_item(usuario_id: uuid.UUID, alimento_id: uuid.UUID,
                 user: User = Depends(get_current_user),
                 db: Session = Depends(get_db)) -> Response:
+    """Remove um alimento da dispensa digital do usuário. Retorna 404 se o item não estiver."""
     require_owner(user, usuario_id)
     item = db.get(PantryItem, (usuario_id, alimento_id))
     if item is None:
