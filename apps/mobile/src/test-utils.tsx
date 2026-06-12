@@ -5,7 +5,7 @@ import { SessionContext, type Session } from "./session/SessionProvider";
 
 export const fakeUser = { id: "u1", email: "ana@helfy.app", name: "Ana" };
 
-export function renderWithProviders(ui: ReactElement, session: Partial<Session> = {}) {
+export async function renderWithProviders(ui: ReactElement, session: Partial<Session> = {}) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const value: Session = {
     ready: true,
