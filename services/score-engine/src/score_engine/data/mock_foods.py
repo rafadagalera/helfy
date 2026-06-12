@@ -6,7 +6,6 @@ Used as a fallback when the Open Food Facts API is unavailable.
 """
 
 import pandas as pd
-import numpy as np
 from pathlib import Path
 
 PROCESSED_DIR = Path(__file__).parents[2] / "data" / "processed"

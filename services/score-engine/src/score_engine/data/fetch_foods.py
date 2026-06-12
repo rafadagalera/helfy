@@ -3,7 +3,6 @@ Fetches food data from the Open Food Facts public API and saves a clean
 foods.csv to data/processed/.
 """
 
-import json
 import time
 import requests
 import pandas as pd
