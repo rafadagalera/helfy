@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  score-engine:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/score-engine
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Instalar dependências
+        run: uv sync
+      - name: Lint
+        run: uv run ruff check .
+      - name: Testes
+        run: uv run pytest -v
+# Job da core-api entra no Plano 2; do mobile, no Plano 3.
