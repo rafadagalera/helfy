@@ -44,6 +44,7 @@ app = FastAPI(
 @app.get("/health", response_model=HealthResponse, tags=["system"],
          summary="Status do serviço e do modelo")
 def health() -> HealthResponse:
+    """Retorna o status do serviço e se o modelo MLP foi carregado com sucesso."""
     return HealthResponse(
         status="ok",
         model_loaded=app.state.engine.model_loaded,
@@ -54,6 +55,13 @@ def health() -> HealthResponse:
 @app.post("/score", response_model=ScoreResponse, tags=["score"],
           summary="Pontua um lote de alimentos para um perfil")
 def score(body: ScoreRequest) -> ScoreResponse:
+    """Calcula o score de compatibilidade nutricional (0.0–1.0) para cada alimento
+    no contexto do perfil de saúde fornecido.
+
+    Não persiste nenhum dado — a engine é completamente stateless.
+    Se o modelo MLP não tiver sido carregado, usa a heurística como fallback
+    (indicado pelo campo `engine: "heuristic"` na resposta).
+    """
     profile_row = map_profile(body.profile.model_dump())
     food_rows = [map_food(food.model_dump()) for food in body.foods]
     results, engine_used = app.state.engine.score_pairs(profile_row, food_rows)

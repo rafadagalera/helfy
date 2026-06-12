@@ -22,65 +22,105 @@ FOOD_EXAMPLE = {
 
 class ProfileIn(BaseModel):
     """Perfil de saúde no vocabulário do Helfy (a engine traduz para o modelo)."""
-    goal: Literal["EMAGRECER", "GANHAR_MASSA", "MANTER"]
+    goal: Literal["EMAGRECER", "GANHAR_MASSA", "MANTER"] = Field(
+        description="Objetivo de saúde: EMAGRECER (perda de peso), "
+                    "GANHAR_MASSA (hipertrofia) ou MANTER (manutenção)")
     diet_type: Literal["omnivore", "vegetarian", "vegan", "keto",
-                       "pescatarian", "paleo"] = "omnivore"
+                       "pescatarian", "paleo"] = Field(
+        default="omnivore",
+        description="Tipo de dieta. Influencia a compatibilidade com alimentos de origem animal")
     activity_level: Literal["sedentary", "lightly_active", "moderately_active",
-                            "very_active"] = "lightly_active"
-    age: int = Field(ge=18, le=110)
-    weight_kg: float = Field(gt=30, le=300)
-    height_cm: float = Field(gt=100, le=250)
-    total_cholesterol: int | None = Field(default=None, ge=100, le=400)
-    glucose: int | None = Field(default=None, ge=40, le=500,
-                                description="Glicemia de jejum em mg/dL")
+                            "very_active"] = Field(
+        default="lightly_active",
+        description="Nível de atividade física semanal")
+    age: int = Field(ge=18, le=110, description="Idade em anos completos")
+    weight_kg: float = Field(gt=30, le=300, description="Peso em quilogramas")
+    height_cm: float = Field(gt=100, le=250, description="Altura em centímetros")
+    total_cholesterol: int | None = Field(
+        default=None, ge=100, le=400,
+        description="Colesterol total em mg/dL. Omitir se não disponível — "
+                    "o modelo usa 180 (mediana populacional) como default")
+    glucose: int | None = Field(
+        default=None, ge=40, le=500,
+        description="Glicemia de jejum em mg/dL. Omitir se não disponível")
     allergies: list[Literal["gluten", "lactose", "nuts", "shellfish",
-                            "eggs", "soy"]] = []
+                            "eggs", "soy"]] = Field(
+        default=[],
+        description="Alérgenos aos quais o usuário é sensível")
     restrictions: list[Literal["low_sodium", "low_sugar", "low_fat",
-                               "high_protein", "low_carb"]] = []
+                               "high_protein", "low_carb"]] = Field(
+        default=[],
+        description="Restrições nutricionais do usuário")
 
     model_config = {"json_schema_extra": {"examples": [PROFILE_EXAMPLE]}}
 
 
 class FoodIn(BaseModel):
     """Alimento com info nutricional por 100g, nas chaves canônicas da engine."""
-    food_id: str
-    food_group: str = "other"
+    food_id: str = Field(description="UUID do alimento no sistema Helfy")
+    food_group: str = Field(
+        default="other",
+        description="Grupo alimentar: grain, vegetable, fruit, meat, fish, "
+                    "dairy, egg, legume, other")
     nutrition: dict[str, float] = Field(
-        description="Chaves: energy_kcal_100g, proteins_100g, carbohydrates_100g, "
-                    "fat_100g, saturated_fat_100g, fiber_100g, sodium_mg_100g, sugar_100g")
-    allergen_flags: list[str] = []
-    flags: list[Literal["animal_product", "meat", "fish"]] = []
+        description="Info nutricional por 100g. Chaves canônicas: energy_kcal_100g, "
+                    "proteins_100g, carbohydrates_100g, fat_100g, saturated_fat_100g, "
+                    "fiber_100g, sodium_mg_100g, sugar_100g")
+    allergen_flags: list[str] = Field(
+        default=[],
+        description="Alérgenos presentes neste alimento "
+                    "(gluten, lactose, nuts, shellfish, eggs, soy)")
+    flags: list[Literal["animal_product", "meat", "fish"]] = Field(
+        default=[],
+        description="Flags adicionais: animal_product (qualquer produto animal), "
+                    "meat (carne), fish (peixe/frutos do mar)")
 
     model_config = {"json_schema_extra": {"examples": [FOOD_EXAMPLE]}}
 
 
 class ScoreRequest(BaseModel):
-    profile: ProfileIn
-    foods: list[FoodIn] = Field(min_length=1)
+    profile: ProfileIn = Field(description="Perfil de saúde do usuário")
+    foods: list[FoodIn] = Field(min_length=1, description="Lote de alimentos a pontuar (mínimo 1)")
 
 
 class Breakdown(BaseModel):
-    allergen_safe: bool
-    diet_compatible: bool
-    goal_alignment: Literal["high", "moderate", "low", "poor"]
-    health_flags: list[str]
-    heuristic_reference: float = Field(description="Score da heurística na escala 0–10")
+    allergen_safe: bool = Field(
+        description="True se o alimento não contém nenhum alérgeno presente no perfil")
+    diet_compatible: bool = Field(
+        description="True se o alimento é compatível com o tipo de dieta do usuário")
+    goal_alignment: Literal["high", "moderate", "low", "poor"] = Field(
+        description="Alinhamento do alimento com o objetivo de saúde: "
+                    "high (forte), moderate, low ou poor (fraco)")
+    health_flags: list[str] = Field(
+        description="Alertas nutricionais quando sódio, açúcar ou gordura saturada "
+                    "excedem os limites para o perfil (ex: hipertensão, diabetes)")
+    heuristic_reference: float = Field(
+        description="Score da heurística de referência na escala 0–10 "
+                    "(o modelo MLP aprende a replicar este valor)")
 
 
 class ScoreItem(BaseModel):
-    food_id: str
-    score: float = Field(ge=0.0, le=1.0)
-    breakdown: Breakdown
+    food_id: str = Field(description="UUID do alimento, idêntico ao food_id enviado no request")
+    score: float = Field(
+        ge=0.0, le=1.0,
+        description="Score de compatibilidade nutricional normalizado "
+                    "(0.0 = incompatível, 1.0 = ideal para este perfil)")
+    breakdown: Breakdown = Field(
+        description="Componentes individuais que compõem e explicam o score")
 
 
 class ScoreResponse(BaseModel):
-    scores: list[ScoreItem]
-    model_version: str
+    scores: list[ScoreItem] = Field(
+        description="Score de cada alimento enviado, na mesma ordem do request")
+    model_version: str = Field(description="Versão do modelo de score em uso")
     engine: Literal["mlp", "heuristic"] = Field(
-        description="'heuristic' indica fallback por falha no carregamento do modelo")
+        description="Motor utilizado: 'mlp' (modelo treinado) ou "
+                    "'heuristic' (fallback quando o modelo não carregou)")
 
 
 class HealthResponse(BaseModel):
-    status: str
-    model_loaded: bool
-    model_version: str
+    status: str = Field(description="Sempre 'ok' quando o serviço está respondendo")
+    model_loaded: bool = Field(
+        description="True se o modelo MLP foi carregado dos artefatos com sucesso; "
+                    "False indica modo fallback heurístico")
+    model_version: str = Field(description="Versão do modelo configurada no serviço")
