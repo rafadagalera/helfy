@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 
 from core_api.auth.routes import router as auth_router
+from core_api.profile.routes import router as profile_router
 
 app = FastAPI(
     title="Helfy Core API",
@@ -11,6 +12,7 @@ app = FastAPI(
 )
 
 app.include_router(auth_router)
+app.include_router(profile_router)
 
 
 @app.get("/health", tags=["system"], summary="Status do serviço")
