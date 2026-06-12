@@ -1,0 +1,30 @@
+# Infra local do Helfy. core-api entra no Plano 2.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-helfy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-helfy}
+      POSTGRES_DB: ${POSTGRES_DB:-helfy}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U helfy"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  score-engine:
+    build: services/score-engine
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen('http://localhost:8001/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
