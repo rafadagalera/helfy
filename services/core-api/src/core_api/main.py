@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 
 from core_api.auth.routes import router as auth_router
+from core_api.foods.routes import router as foods_router
 from core_api.profile.routes import router as profile_router
 
 app = FastAPI(
@@ -13,6 +14,7 @@ app = FastAPI(
 
 app.include_router(auth_router)
 app.include_router(profile_router)
+app.include_router(foods_router)
 
 
 @app.get("/health", tags=["system"], summary="Status do serviço")
