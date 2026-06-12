@@ -35,8 +35,9 @@ def score(body: ScoreRequest, user: User = Depends(get_current_user),
                             detail="Cadastre o perfil antes de pedir scores personalizados")
 
     foods = [db.get(Food, fid) for fid in body.alimento_ids]
-    if any(f is None for f in foods):
-        raise HTTPException(status_code=404, detail="Alimento não encontrado")
+    missing_ids = [str(fid) for fid, f in zip(body.alimento_ids, foods) if f is None]
+    if missing_ids:
+        raise HTTPException(status_code=404, detail=f"Alimentos não encontrados: {', '.join(missing_ids)}")
 
     try:
         scores = get_scores(db, profile, foods)
