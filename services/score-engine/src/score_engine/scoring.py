@@ -9,7 +9,7 @@ import pandas as pd
 # Re-export: a função canônica vive no pipeline de dados replicado (DRY)
 from score_engine.data.generate_pairs import compute_score  # noqa: F401
 
-ALLERGENS = ["gluten", "lactose", "nuts", "shellfish", "eggs", "soy"]
+from score_engine.mapping.profile import VALID_ALLERGENS as ALLERGENS
 
 
 def build_breakdown(ind: pd.Series, food: pd.Series, heuristic_score: float) -> dict:
