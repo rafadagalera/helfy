@@ -1,10 +1,16 @@
+import os
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from core_api.db.base import Base
+import core_api.db.models  # noqa: F401 — registra todos os modelos no metadata
 
-TEST_DATABASE_URL = "postgresql+psycopg://helfy:helfy@localhost:5433/helfy_test"
+TEST_DATABASE_URL = os.getenv(
+    "CORE_TEST_DATABASE_URL",
+    "postgresql+psycopg://helfy:helfy@localhost:5433/helfy_test",
+)
 
 engine = create_engine(TEST_DATABASE_URL)
 TestingSession = sessionmaker(bind=engine, autoflush=False)
@@ -12,13 +18,18 @@ TestingSession = sessionmaker(bind=engine, autoflush=False)
 
 @pytest.fixture()
 def db():
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
+    with engine.connect() as conn:
+        Base.metadata.drop_all(conn)
+        Base.metadata.create_all(conn)
+        conn.commit()
     session = TestingSession()
     try:
         yield session
     finally:
         session.close()
+        with engine.connect() as conn:
+            Base.metadata.drop_all(conn)
+            conn.commit()
 
 
 @pytest.fixture()

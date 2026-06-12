@@ -20,4 +20,33 @@ jobs:
         run: uv run ruff check .
       - name: Testes
         run: uv run pytest -v
-# Job da core-api entra no Plano 2; do mobile, no Plano 3.
+
+  core-api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/core-api
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: helfy
+          POSTGRES_PASSWORD: helfy
+          POSTGRES_DB: helfy_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U helfy"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Instalar dependências
+        run: uv sync
+      - name: Lint
+        run: uv run ruff check .
+      - name: Testes
+        run: uv run pytest -v
+        env:
+          CORE_TEST_DATABASE_URL: postgresql+psycopg://helfy:helfy@localhost:5432/helfy_test
+# Job do mobile entra no Plano 3.

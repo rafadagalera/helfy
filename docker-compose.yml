@@ -1,4 +1,3 @@
-# Infra local do Helfy. core-api entra no Plano 2.
 services:
   postgres:
     image: postgres:16-alpine
@@ -25,6 +24,20 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  core-api:
+    build: services/core-api
+    environment:
+      CORE_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-helfy}:${POSTGRES_PASSWORD:-helfy}@postgres:5432/${POSTGRES_DB:-helfy}
+      CORE_SCORE_ENGINE_URL: http://score-engine:8001
+      CORE_JWT_SECRET: ${CORE_JWT_SECRET:-dev-secret-change-me}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      score-engine:
+        condition: service_healthy
 
 volumes:
   pgdata:
