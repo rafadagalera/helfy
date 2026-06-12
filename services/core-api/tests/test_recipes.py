@@ -75,6 +75,16 @@ def test_engine_down_degrades_to_coverage_order(client, db):
     assert all(r["score_medio"] is None for r in body["receitas"])
     assert len(body["receitas"]) >= 1
 
+    # Verify ordering: coverage desc, then name asc for ties
+    coverages = [r["coverage"] for r in body["receitas"]]
+    assert coverages == sorted(coverages, reverse=True)
+    # At equal coverage, names must be alphabetically sorted
+    equal_groups = {}
+    for r in body["receitas"]:
+        equal_groups.setdefault(r["coverage"], []).append(r["name"])
+    for cov, names in equal_groups.items():
+        assert names == sorted(names), f"coverage={cov}: names not sorted: {names}"
+
 
 def test_empty_pantry_returns_empty_list(client, db):
     run_seed(db)
