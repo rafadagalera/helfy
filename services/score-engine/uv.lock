@@ -1063,13 +1063,10 @@ source = { virtual = "." }
 dependencies = [
     { name = "fastapi" },
     { name = "joblib" },
-    { name = "matplotlib" },
     { name = "numpy" },
     { name = "pandas" },
     { name = "pydantic" },
-    { name = "requests" },
     { name = "scikit-learn" },
-    { name = "seaborn" },
     { name = "uvicorn", extra = ["standard"] },
 ]
 
@@ -1079,18 +1076,20 @@ dev = [
     { name = "pytest" },
     { name = "ruff" },
 ]
+train = [
+    { name = "matplotlib" },
+    { name = "requests" },
+    { name = "seaborn" },
+]
 
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.111" },
     { name = "joblib", specifier = ">=1.4" },
-    { name = "matplotlib", specifier = ">=3.8" },
-    { name = "numpy", specifier = ">=1.26" },
+    { name = "numpy", specifier = ">=2.0" },
     { name = "pandas", specifier = ">=2.0" },
     { name = "pydantic", specifier = ">=2.7" },
-    { name = "requests", specifier = ">=2.31" },
     { name = "scikit-learn", specifier = ">=1.8" },
-    { name = "seaborn", specifier = ">=0.13" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.29" },
 ]
 
@@ -1099,6 +1098,11 @@ dev = [
     { name = "httpx", specifier = ">=0.27" },
     { name = "pytest", specifier = ">=8" },
     { name = "ruff", specifier = ">=0.4" },
+]
+train = [
+    { name = "matplotlib", specifier = ">=3.8" },
+    { name = "requests", specifier = ">=2.31" },
+    { name = "seaborn", specifier = ">=0.13" },
 ]
 
 [[package]]
