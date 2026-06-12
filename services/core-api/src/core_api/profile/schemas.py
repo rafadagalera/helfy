@@ -17,21 +17,38 @@ PROFILE_EXAMPLE = {
 
 
 class ProfileIn(BaseModel):
-    age: int = Field(ge=18, le=110)
-    height_cm: float = Field(gt=100, le=250)
-    weight_kg: float = Field(gt=30, le=300)
-    goal: Goal
-    diet_type: DietType = "omnivore"
-    activity_level: ActivityLevel = "lightly_active"
-    cholesterol: int | None = Field(default=None, ge=100, le=400)
-    glucose: int | None = Field(default=None, ge=40, le=500,
-                                description="Glicemia de jejum em mg/dL")
-    restrictions: list[Restriction] = []
-    preferences: list[str] = []
-    allergies: list[Allergen] = []
+    age: int = Field(ge=18, le=110, description="Idade em anos completos")
+    height_cm: float = Field(gt=100, le=250, description="Altura em centímetros")
+    weight_kg: float = Field(gt=30, le=300, description="Peso em quilogramas")
+    goal: Goal = Field(
+        description="Objetivo de saúde: EMAGRECER (perda de peso), "
+                    "GANHAR_MASSA (hipertrofia) ou MANTER (manutenção)")
+    diet_type: DietType = Field(
+        default="omnivore",
+        description="Tipo de dieta. Influencia compatibilidade com alimentos de origem animal")
+    activity_level: ActivityLevel = Field(
+        default="lightly_active",
+        description="Nível de atividade física semanal")
+    cholesterol: int | None = Field(
+        default=None, ge=100, le=400,
+        description="Colesterol total em mg/dL. Omitir se não disponível")
+    glucose: int | None = Field(
+        default=None, ge=40, le=500,
+        description="Glicemia de jejum em mg/dL. Omitir se não disponível")
+    restrictions: list[Restriction] = Field(
+        default=[],
+        description="Restrições nutricionais "
+                    "(low_sodium, low_sugar, low_fat, high_protein, low_carb)")
+    preferences: list[str] = Field(
+        default=[],
+        description="Preferências alimentares livres (ex: 'doces', 'picantes')")
+    allergies: list[Allergen] = Field(
+        default=[],
+        description="Alérgenos aos quais o usuário é sensível "
+                    "(gluten, lactose, nuts, shellfish, eggs, soy)")
 
     model_config = {"json_schema_extra": {"examples": [PROFILE_EXAMPLE]}}
 
 
 class ProfileOut(ProfileIn):
-    user_id: str
+    user_id: str = Field(description="UUID do usuário dono deste perfil")
