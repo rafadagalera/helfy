@@ -59,8 +59,9 @@ def test_barcode_not_found_in_off_404(client):
 @respx.mock
 def test_off_unavailable_502(client):
     headers, _ = auth_headers(client)
+    import httpx as _httpx
     respx.get(f"{settings.off_base_url}/api/v2/product/111.json").mock(
-        side_effect=Exception("timeout"))
+        side_effect=_httpx.ConnectError("timeout"))
     assert client.get("/alimentos/barcode/111", headers=headers).status_code == 502
 
 

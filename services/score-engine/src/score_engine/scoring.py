@@ -48,7 +48,7 @@ def build_breakdown(ind: pd.Series, food: pd.Series, heuristic_score: float) -> 
     sodium = food.get("sodium_mg_100g", 0)
     sugar = food.get("sugar_100g", 0)
     sat_fat = food.get("saturated_fat_100g", 0)
-    if ind.get("hypertension", "none") != "none" and sodium > 200:
+    if (ind.get("hypertension", "none") != "none" or ind.get("restriction_low_sodium", 0)) and sodium > 200:
         flags.append(f"sodium: caution ({sodium:.0f} mg/100g)")
     if ind.get("glycemic_condition", "none") != "none" and sugar > 8:
         flags.append(f"sugar: caution ({sugar:.1f} g/100g)")

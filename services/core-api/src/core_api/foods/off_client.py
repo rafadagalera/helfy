@@ -85,7 +85,7 @@ def fetch_product(barcode: str) -> dict | None:
         resp = httpx.get(url, timeout=10.0)
         resp.raise_for_status()
         data = resp.json()
-    except Exception as exc:
+    except httpx.HTTPError as exc:
         logger.warning("Open Food Facts indisponível para %s: %s", barcode, exc)
         raise OffUnavailableError(str(exc)) from exc
     if data.get("status") != 1:
