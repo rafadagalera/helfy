@@ -1,0 +1,178 @@
+{
+  "info": {
+    "name": "Helfy Core API — Sprint 4",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Automacao deterministica do fluxo Helfy: auth -> perfil -> dispensa -> score -> receitas. Cria seus proprios dados; nao depende de seed nem de rede externa."
+  },
+  "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+  "item": [
+    {
+      "name": "A1 Register (201)",
+      "event": [
+        { "listen": "prerequest", "script": { "type": "text/javascript", "exec": [
+          "pm.environment.set('email', 'helfy_' + Date.now() + '@example.com');"
+        ] } },
+        { "listen": "test", "script": { "type": "text/javascript", "exec": [
+          "pm.test('status 201', () => pm.response.to.have.status(201));",
+          "const b = pm.response.json();",
+          "pm.test('tem id e email', () => { pm.expect(b).to.have.property('id'); pm.expect(b).to.have.property('email'); });",
+          "pm.environment.set('userId', b.id);"
+        ] } }
+      ],
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth","register"] },
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Teste Helfy\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}" }
+      }
+    },
+    {
+      "name": "A2 Register duplicado (409)",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('status 409', () => pm.response.to.have.status(409));"
+      ] } } ],
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth","register"] },
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Outro\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}" }
+      }
+    },
+    {
+      "name": "A3 Login (200)",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('status 200', () => pm.response.to.have.status(200));",
+        "const b = pm.response.json();",
+        "pm.test('tem access_token', () => pm.expect(b.access_token).to.be.a('string').and.not.empty);",
+        "pm.environment.set('token', b.access_token);"
+      ] } } ],
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"] },
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}" }
+      }
+    },
+    {
+      "name": "A4 Login senha errada (401)",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('status 401', () => pm.response.to.have.status(401));"
+      ] } } ],
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"] },
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"senhaErrada\"\n}" }
+      }
+    },
+    {
+      "name": "A5 /auth/me sem token (401)",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('status 401', () => pm.response.to.have.status(401));"
+      ] } } ],
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth","me"] }
+      }
+    },
+    {
+      "name": "A6 PUT perfil (200)",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('status 200', () => pm.response.to.have.status(200));",
+        "const b = pm.response.json();",
+        "pm.test('eco do objetivo', () => pm.expect(b.goal).to.eql('EMAGRECER'));",
+        "pm.test('eco do peso', () => pm.expect(b.weight_kg).to.eql(80));"
+      ] } } ],
+      "request": {
+        "method": "PUT",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/perfil/{{userId}}", "host": ["{{baseUrl}}"], "path": ["perfil","{{userId}}"] },
+        "body": { "mode": "raw", "raw": "{\n  \"age\": 30,\n  \"height_cm\": 170,\n  \"weight_kg\": 80,\n  \"goal\": \"EMAGRECER\",\n  \"diet_type\": \"vegetarian\",\n  \"activity_level\": \"lightly_active\",\n  \"cholesterol\": 210,\n  \"glucose\": 110,\n  \"restrictions\": [\"low_sugar\"],\n  \"preferences\": [\"doces\"],\n  \"allergies\": [\"lactose\"]\n}" }
+      }
+    },
+    {
+      "name": "A7 POST alimento manual (201)",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('status 201', () => pm.response.to.have.status(201));",
+        "const b = pm.response.json();",
+        "pm.test('source MANUAL', () => pm.expect(b.source).to.eql('MANUAL'));",
+        "pm.environment.set('foodId', b.id);"
+      ] } } ],
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/alimentos", "host": ["{{baseUrl}}"], "path": ["alimentos"] },
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Banana de Teste\",\n  \"food_group\": \"fruit\",\n  \"nutrition\": { \"energy_kcal_100g\": 89, \"proteins_100g\": 1.1, \"carbohydrates_100g\": 23, \"fat_100g\": 0.3, \"fiber_100g\": 2.6, \"sugar_100g\": 12, \"sodium_mg_100g\": 1 },\n  \"allergen_flags\": [],\n  \"flags\": []\n}" }
+      }
+    },
+    {
+      "name": "A8 Add dispensa por alimento_id (201)",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('status 201', () => pm.response.to.have.status(201));",
+        "const b = pm.response.json();",
+        "pm.test('food.id == foodId', () => pm.expect(b.food.id).to.eql(pm.environment.get('foodId')));"
+      ] } } ],
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/dispensa/{{userId}}/adicionar", "host": ["{{baseUrl}}"], "path": ["dispensa","{{userId}}","adicionar"] },
+        "body": { "mode": "raw", "raw": "{\n  \"alimento_id\": \"{{foodId}}\",\n  \"quantidade\": 500\n}" }
+      }
+    },
+    {
+      "name": "A9 Listar dispensa (200)",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('status 200', () => pm.response.to.have.status(200));",
+        "const b = pm.response.json();",
+        "pm.test('contem o alimento adicionado', () => { const ids = b.map(i => i.food.id); pm.expect(ids).to.include(pm.environment.get('foodId')); });"
+      ] } } ],
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/dispensa/{{userId}}", "host": ["{{baseUrl}}"], "path": ["dispensa","{{userId}}"] }
+      }
+    },
+    {
+      "name": "A10 Score (200)",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('status 200', () => pm.response.to.have.status(200));",
+        "const b = pm.response.json();",
+        "pm.test('retorna um score', () => pm.expect(b).to.be.an('array').with.lengthOf(1));",
+        "pm.test('score em [0,1]', () => { pm.expect(b[0].score).to.be.at.least(0); pm.expect(b[0].score).to.be.at.most(1); });",
+        "pm.test('justificativa nao vazia (SCRUM-19)', () => pm.expect(b[0].justificativa).to.be.a('string').and.not.empty);"
+      ] } } ],
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/score", "host": ["{{baseUrl}}"], "path": ["score"] },
+        "body": { "mode": "raw", "raw": "{\n  \"usuario_id\": \"{{userId}}\",\n  \"alimento_ids\": [\"{{foodId}}\"]\n}" }
+      }
+    },
+    {
+      "name": "A11 Receitas sugeridas (200, contrato)",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('status 200', () => pm.response.to.have.status(200));",
+        "const b = pm.response.json();",
+        "pm.test('schema receitas/scored', () => { pm.expect(b.receitas).to.be.an('array'); pm.expect(b.scored).to.be.a('boolean'); });"
+      ] } } ],
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/receitas/sugeridas/{{userId}}", "host": ["{{baseUrl}}"], "path": ["receitas","sugeridas","{{userId}}"] }
+      }
+    },
+    {
+      "name": "A12 Remover da dispensa (204)",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('status 204', () => pm.response.to.have.status(204));"
+      ] } } ],
+      "request": {
+        "method": "DELETE",
+        "url": { "raw": "{{baseUrl}}/dispensa/{{userId}}/{{foodId}}", "host": ["{{baseUrl}}"], "path": ["dispensa","{{userId}}","{{foodId}}"] }
+      }
+    }
+  ]
+}
