@@ -1,44 +1,13 @@
-Work Item Type,Title,Test Step,Step Action,Step Expected,Tags
-Test Case,TC-01 Registro de novo usuario,1,"Abrir o app na tela inicial","Tela inicial visivel",Auth
-,,2,"Tocar em Criar conta","Formulario de cadastro exibido",
-,,3,"Preencher nome=Teste Helfy, email=teste.helfy@example.com, senha=Senha@12345","Campos preenchidos",
-,,4,"Tocar em Cadastrar","Conta criada (HTTP 201) e login automatico",
-,,5,"Observar a navegacao","Home carregada autenticada",
-Test Case,TC-02 Registro com email existente,1,"Abrir Criar conta","Formulario exibido",Auth
-,,2,"Preencher email=teste.helfy@example.com (ja usado)","Campos preenchidos",
-,,3,"Tocar em Cadastrar","Erro E-mail ja cadastrado (HTTP 409)",
-Test Case,TC-03 Login com credenciais validas,1,"Tela de login","Formulario de login exibido",Auth
-,,2,"Preencher email=teste.helfy@example.com, senha=Senha@12345","Campos preenchidos",
-,,3,"Tocar em Entrar","Sessao autenticada, Home carregada",
-Test Case,TC-04 Login com senha incorreta,1,"Tela de login","Formulario exibido",Auth
-,,2,"Preencher email correto e senha=senhaErrada","Campos preenchidos",
-,,3,"Tocar em Entrar","Erro Credenciais invalidas (HTTP 401)",
-Test Case,TC-05 Completar perfil onboarding,1,"Abrir aba Perfil","Tela de perfil exibida",Perfil
-,,2,"Preencher idade=30, altura=170, peso=80, objetivo=EMAGRECER","Campos preenchidos",
-,,3,"Selecionar dieta=vegetarian, restricao=low_sugar, alergia=lactose","Selecoes aplicadas",
-,,4,"Informar colesterol=210, glicose=110","Campos preenchidos",
-,,5,"Salvar","Perfil salvo (HTTP 200) e dados persistidos",
-Test Case,TC-06 Perfil com peso invalido,1,"Abrir Perfil","Tela exibida",Perfil
-,,2,"Informar peso=10","Valor abaixo do minimo (30 kg)",
-,,3,"Tentar salvar","Validacao impede salvar (HTTP 422)",
-Test Case,TC-07 Adicionar alimento por barcode,1,"Abrir Dispensa","Tela da dispensa exibida",Dispensa
-,,2,"Adicionar -> Escanear","Leitor/entrada de codigo exibido",
-,,3,"Informar codigo 7894900011517","Produto localizado no Open Food Facts",
-,,4,"Confirmar adicao","Item adicionado (HTTP 201) e listado",
-Test Case,TC-08 Adicionar alimento manual,1,"Abrir Dispensa","Tela exibida",Dispensa
-,,2,"Adicionar -> Manual","Formulario manual exibido",
-,,3,"Preencher nome=Banana, grupo=fruit, calorias/100g=89","Campos preenchidos",
-,,4,"Confirmar","Item criado e adicionado (HTTP 201)",
-Test Case,TC-09 Remover alimento da dispensa,1,"Abrir Dispensa com item Banana","Item visivel",Dispensa
-,,2,"Acionar remocao do item Banana","Confirmacao solicitada",
-,,3,"Confirmar remocao","Item removido (HTTP 204) e fora da lista",
-Test Case,TC-10 Ver score e justificativa,1,"Abrir Dispensa","Itens com score exibidos",Score
-,,2,"Selecionar um alimento (ex Banana)","Detalhe do alimento",
-,,3,"Verificar score","Valor entre 0.0 e 1.0 exibido",
-,,4,"Abrir justificativa","Texto explicativo do score (SCRUM-19)",
-Test Case,TC-11 Ver receitas sugeridas,1,"Adicionar arroz integral, feijao preto e peito de frango","Itens na dispensa",Receitas
-,,2,"Abrir Home / aba de receitas","Lista de sugestoes carregada",
-,,3,"Conferir sugestoes","Ao menos 1 receita viavel (cobertura >=70%) exibida",
-Test Case,TC-12 Receitas sem perfil,1,"Logar usuario novo sem perfil","Sessao autenticada sem perfil",Receitas
-,,2,"Abrir tela de receitas","Requisicao de sugestoes disparada",
-,,3,"Observar resposta","Bloqueio pedindo cadastro de perfil (HTTP 409)",
+Work Item Type,Title,Tags
+Test Case,TC-01 Registro de novo usuario,Auth
+Test Case,TC-02 Registro com email existente,Auth
+Test Case,TC-03 Login com credenciais validas,Auth
+Test Case,TC-04 Login com senha incorreta,Auth
+Test Case,TC-05 Completar perfil onboarding,Perfil
+Test Case,TC-06 Perfil com peso invalido,Perfil
+Test Case,TC-07 Adicionar alimento por barcode,Dispensa
+Test Case,TC-08 Adicionar alimento manual,Dispensa
+Test Case,TC-09 Remover alimento da dispensa,Dispensa
+Test Case,TC-10 Ver score e justificativa,Score
+Test Case,TC-11 Ver receitas sugeridas,Receitas
+Test Case,TC-12 Receitas sem perfil,Receitas
