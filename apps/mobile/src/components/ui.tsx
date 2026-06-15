@@ -30,6 +30,8 @@ export function Button({
     <Pressable
       onPress={onPress}
       disabled={loading}
+      accessibilityRole="button"
+      accessibilityLabel={title}
       style={[styles.button, variant === "outline" && styles.buttonOutline,
               variant === "danger" && styles.buttonDanger]}
     >
