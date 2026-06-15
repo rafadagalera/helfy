@@ -20,6 +20,23 @@ docker compose up --build
 # postgres:     localhost:5432 (helfy/helfy)
 ```
 
+## Mobile
+
+```bash
+cd apps/mobile && npm install
+npx expo start   # escaneie o QR com o app Expo Go
+```
+
+**Testes:**
+```bash
+npm test
+```
+
+**Variável de ambiente:** crie `apps/mobile/.env` com:
+```
+EXPO_PUBLIC_API_URL=http://<seu-ip>:8000
+```
+
 ## Documentação
 
 - Arquitetura: `docs/superpowers/specs/2026-06-11-helfy-monorepo-design.md`
