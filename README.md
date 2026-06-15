@@ -41,3 +41,6 @@ EXPO_PUBLIC_API_URL=http://<seu-ip>:8000
 
 - Arquitetura: `docs/superpowers/specs/2026-06-11-helfy-monorepo-design.md`
 - Contexto canônico: `CLAUDE.md`
+- Plano de testes (Sprint 4): `docs/testing/2026-06-15-plano-testes-sprint4.md`
+- Test Cases para Azure Boards: `tests/manual/azure-boards-testcases.csv`
+- Automação Postman: `tests/postman/` (ver `tests/postman/README.md`)
