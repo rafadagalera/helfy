@@ -1,13 +1,13 @@
 Work Item Type,Title,Tags
-Test Case,TC-01 Registro de novo usuario,Auth
-Test Case,TC-02 Registro com email existente,Auth
-Test Case,TC-03 Login com credenciais validas,Auth
-Test Case,TC-04 Login com senha incorreta,Auth
-Test Case,TC-05 Completar perfil onboarding,Perfil
-Test Case,TC-06 Perfil com peso invalido,Perfil
-Test Case,TC-07 Adicionar alimento por barcode,Dispensa
-Test Case,TC-08 Adicionar alimento manual,Dispensa
-Test Case,TC-09 Remover alimento da dispensa,Dispensa
-Test Case,TC-10 Ver score e justificativa,Score
-Test Case,TC-11 Ver receitas sugeridas,Receitas
-Test Case,TC-12 Receitas sem perfil,Receitas
+User Story,TC-01 Registro de novo usuario,Auth
+User Story,TC-02 Registro com email existente,Auth
+User Story,TC-03 Login com credenciais validas,Auth
+User Story,TC-04 Login com senha incorreta,Auth
+User Story,TC-05 Completar perfil onboarding,Perfil
+User Story,TC-06 Perfil com peso invalido,Perfil
+User Story,TC-07 Adicionar alimento por barcode,Dispensa
+User Story,TC-08 Adicionar alimento manual,Dispensa
+User Story,TC-09 Remover alimento da dispensa,Dispensa
+User Story,TC-10 Ver score e justificativa,Score
+User Story,TC-11 Ver receitas sugeridas,Receitas
+User Story,TC-12 Receitas sem perfil,Receitas
