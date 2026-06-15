@@ -10,12 +10,12 @@ export default function PantryTab() {
   const router = useRouter();
   const { user } = useSession();
   const pantry = usePantry(user?.id);
-  const foodIds = (pantry.data ?? []).map((item) => item.food_id);
+  const foodIds = (pantry.data ?? []).map((item) => item.food.id);
   const scores = useScores(user?.id, foodIds);
   const remove = useRemovePantryItem(user?.id ?? "");
 
   const scoreMap = new Map<string, ScoreOut>(
-    (scores.data ?? []).map((s) => [s.food_id, s]),
+    (scores.data ?? []).map((s) => [s.alimento_id, s]),
   );
 
   function scoreFor(foodId: string): number | null {
@@ -23,11 +23,20 @@ export default function PantryTab() {
   }
 
   function justificationFor(foodId: string): string | null {
-    return scoreMap.get(foodId)?.justification ?? null;
+    return scoreMap.get(foodId)?.justificativa ?? null;
   }
 
   if (pantry.isLoading) {
     return <Screen><ActivityIndicator color={colors.primary} /></Screen>;
+  }
+
+  if (pantry.isError) {
+    return (
+      <Screen>
+        <Title>Dispensa</Title>
+        <Text style={styles.empty}>Erro ao carregar dispensa. Tente novamente.</Text>
+      </Screen>
+    );
   }
 
   return (
@@ -40,13 +49,13 @@ export default function PantryTab() {
       )}
       <FlatList
         data={pantry.data ?? []}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.food.id}
         renderItem={({ item }) => (
           <PantryRow
             item={item}
-            score={scoreFor(item.food_id)}
-            justification={justificationFor(item.food_id)}
-            onRemove={() => remove.mutate(item.food_id)}
+            score={scoreFor(item.food.id)}
+            justification={justificationFor(item.food.id)}
+            onRemove={() => remove.mutate(item.food.id)}
           />
         )}
       />

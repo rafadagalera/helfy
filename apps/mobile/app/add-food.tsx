@@ -90,7 +90,6 @@ function ManualTab({
   onDone: () => void;
 }) {
   const [name, setName] = useState("");
-  const [barcode, setBarcode] = useState("");
 
   const error = createFood.error?.message ?? addToP.error?.message;
   const loading = createFood.isPending || addToP.isPending;
@@ -98,7 +97,7 @@ function ManualTab({
   function submit() {
     if (!name.trim()) return;
     createFood.mutate(
-      { name: name.trim(), barcode: barcode.trim() || undefined },
+      { name: name.trim() },
       {
         onSuccess: (food) => {
           addToP.mutate({ food_id: food.id }, { onSuccess: onDone });
@@ -111,8 +110,6 @@ function ManualTab({
     <View>
       <Input label="Nome do alimento" value={name} onChangeText={setName}
              placeholder="Ex: Arroz integral" />
-      <Input label="Código de barras (opcional)" value={barcode} onChangeText={setBarcode}
-             placeholder="Ex: 7891234567890" keyboardType="number-pad" />
       <ErrorText>{error}</ErrorText>
       <Button title="Adicionar" onPress={submit} loading={loading} />
     </View>

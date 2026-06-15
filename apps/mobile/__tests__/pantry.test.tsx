@@ -6,8 +6,8 @@ const fetchMock = jest.fn();
 global.fetch = fetchMock as unknown as typeof fetch;
 
 const fakeFood = { id: "f1", name: "Arroz", barcode: null };
-const fakePantryItem = { id: "pi1", user_id: fakeUser.id, food_id: "f1", food: fakeFood };
-const fakeScore = { user_id: fakeUser.id, food_id: "f1", score: 0.85, justification: "Rico em fibras" };
+const fakePantryItem = { food: fakeFood, quantidade: null };
+const fakeScore = { alimento_id: "f1", score: 0.85, justificativa: "Rico em fibras" };
 
 function mockFetch(pantryItems: typeof fakePantryItem[], scoreItems: typeof fakeScore[]) {
   fetchMock.mockImplementation((url: string, init?: RequestInit) => {

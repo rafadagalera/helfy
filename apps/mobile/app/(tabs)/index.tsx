@@ -22,7 +22,7 @@ export default function HomeTab() {
     );
   }
 
-  const data = recipes.data?.recipes ?? [];
+  const data = recipes.data?.receitas ?? [];
 
   return (
     <Screen>
@@ -42,7 +42,7 @@ export default function HomeTab() {
 }
 
 function RecipeCard({ recipe }: { recipe: RecipeOut }) {
-  const ingredientNames = recipe.ingredients.map((i) => i.name).join(", ");
+  const ingredientNames = recipe.ingredientes_faltantes.join(", ");
   return (
     <View style={styles.card}>
       <Text style={styles.recipeName}>{recipe.name}</Text>

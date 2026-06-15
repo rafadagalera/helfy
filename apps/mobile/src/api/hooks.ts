@@ -8,7 +8,7 @@ import type {
 export const keys = {
   profile: (userId: string) => ["profile", userId] as const,
   pantry: (userId: string) => ["pantry", userId] as const,
-  scores: (userId: string, foodIds: string[]) => ["scores", userId, ...foodIds] as const,
+  scores: (userId: string, foodIds: string[]) => ["scores", userId, ...[...foodIds].sort()] as const,
   recipes: (userId: string) => ["recipes", userId] as const,
 };
 
@@ -26,7 +26,9 @@ export function useSaveProfile(userId: string) {
   return useMutation({
     mutationFn: (body: ProfileIn) =>
       api<ProfileOut>(`/perfil/${userId}`, { method: "PUT", body: JSON.stringify(body) }),
-    onSuccess: () => qc.invalidateQueries(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.profile(userId) });
+    },
   });
 }
 

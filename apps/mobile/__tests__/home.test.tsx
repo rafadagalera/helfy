@@ -10,14 +10,15 @@ afterEach(() => fetchMock.mockReset());
 const fakeRecipe = {
   id: "r1", name: "Omelete",
   instructions: "Bata os ovos.",
-  ingredients: [{ id: "f1", name: "Ovo", barcode: null }],
-  nutritional_info: null,
+  coverage: 1.0,
+  score_medio: 0.85,
+  ingredientes_faltantes: ["Ovo"],
 };
 
 test("exibe estado vazio quando não há receitas", async () => {
   fetchMock.mockResolvedValue({
     ok: true, status: 200,
-    json: () => Promise.resolve({ recipes: [] }),
+    json: () => Promise.resolve({ receitas: [], scored: false }),
   });
   await renderWithProviders(<HomeTab />);
   await waitFor(() =>
@@ -28,7 +29,7 @@ test("exibe estado vazio quando não há receitas", async () => {
 test("exibe receitas sugeridas", async () => {
   fetchMock.mockResolvedValue({
     ok: true, status: 200,
-    json: () => Promise.resolve({ recipes: [fakeRecipe] }),
+    json: () => Promise.resolve({ receitas: [fakeRecipe], scored: true }),
   });
   await renderWithProviders(<HomeTab />);
   await waitFor(() => expect(screen.getByText("Omelete")).toBeTruthy());
