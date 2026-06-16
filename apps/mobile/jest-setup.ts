@@ -1,3 +1,7 @@
+// Informa ao React que o ambiente de teste suporta act(), evitando falsos erros
+// de "not configured to support act" com React 19 + jest-expo
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+
 jest.mock("expo-router", () => {
   const React = require("react");
   return {
