@@ -49,10 +49,124 @@ Esperado: `failed = 0` no resumo (todas as asserções verdes).
 
 ## Roteiro do vídeo (entrega Parte B)
 
-1. **Intro (10s):** dizer nome da equipe e que o sistema é API-first (cliente mobile fino).
-2. **Configuração (30s):** mostrar `docker compose up -d --build` e `curl http://localhost:8000/health`.
-3. **Postman (60s):** abrir o Postman, mostrar a collection importada, o environment "Helfy Local"
-   selecionado, e abrir 1–2 requests destacando as abas "Body" e "Tests" (asserções `pm.test`).
-4. **Execução (60s):** rodar o Collection Runner e mostrar todos os requests verdes.
-5. **CLI (30s):** rodar `npx newman run ...` no terminal e mostrar `failed = 0`.
-6. **Fecho (10s):** apontar que o fluxo cobre auth → perfil → dispensa → score → receitas.
+### Ferramentas de gravação
+
+| Sistema | Opção gratuita |
+|---|---|
+| macOS | QuickTime Player → "Nova gravação de tela" |
+| Windows | Xbox Game Bar (`Win + G`) ou OBS Studio |
+| Linux | OBS Studio ou `SimpleScreenRecorder` |
+
+**Configurações recomendadas:**
+- Resolução mínima: 1280 × 720. Prefira 1920 × 1080 se o monitor permitir.
+- Frame rate: 30 fps é suficiente.
+- Áudio: microfone com narração (sem música de fundo).
+- Janela do terminal: fonte ≥ 14 pt, tema escuro (facilita leitura).
+- Janela do Postman: maximizada ou em tela cheia.
+
+Grave tudo em uma única tomada contínua (sem cortes) — a maioria das entregas FIAP exige isso.
+
+---
+
+### Cena 1 — Introdução (≈ 10 s)
+
+**O que mostrar:** tela inicial do Postman ou o repositório aberto no VS Code.
+
+**O que falar:**
+> "Olá, somos a equipe Helfy. Nosso sistema é API-first: a lógica fica na core-api e o app mobile consome os endpoints. Vou demonstrar a suite de testes automatizados da Sprint 4, que cobre o fluxo completo de auth, perfil, dispensa, score nutricional e receitas."
+
+---
+
+### Cena 2 — Subindo o backend (≈ 30 s)
+
+**O que mostrar:** terminal com os dois comandos abaixo rodando.
+
+```bash
+# Na raiz do repositório:
+docker compose up -d --build
+```
+
+Aguarde até os containers aparecerem como `Started` ou `Running`. Em seguida:
+
+```bash
+curl http://localhost:8000/health
+# Esperado: {"status":"ok"}
+```
+
+**O que falar:**
+> "Com um único `docker compose up` temos a core-api na porta 8000, o score-engine na 8001 e o PostgreSQL. O health check confirma que a API está no ar."
+
+**Dica:** se os containers já estiverem rodando de uma sessão anterior, mostre `docker compose ps` primeiro para deixar claro o estado inicial.
+
+---
+
+### Cena 3 — Tour pela collection (≈ 60 s)
+
+**O que mostrar:** Postman Desktop aberto com a collection e o environment importados.
+
+Passo a passo na tela:
+1. No painel esquerdo, expanda **Helfy Core API — Sprint 4** e role devagar pelos 12 requests para que fiquem visíveis.
+2. Clique no request **A1 — POST /auth/register** e mostre a aba **Body** — destacar o campo `email` com timestamp (`helfy_{{timestamp}}@test.com`) que garante unicidade entre execuções.
+3. Clique na aba **Tests** do mesmo request e leia em voz alta uma asserção, por exemplo:
+   ```js
+   pm.test("status 201", () => pm.response.to.have.status(201));
+   pm.test("retorna userId", () => { ... pm.environment.set("userId", ...); });
+   ```
+4. Repita o passo 3 com **A10 — POST /score**: mostrar que o teste valida `score` entre 0 e 1 e que `justificativa` existe (transparência SCRUM-19).
+5. Mostre o environment **Helfy Local** selecionado no canto superior direito e abra-o rapidamente para exibir a variável `baseUrl = http://localhost:8000`.
+
+**O que falar:**
+> "Cada request tem asserções na aba Tests. O e-mail usa um timestamp para que a collection possa rodar várias vezes sem conflito. A variável `userId` é capturada no registro e reutilizada nos requests seguintes — o fluxo é encadeado."
+
+---
+
+### Cena 4 — Execução no Collection Runner (≈ 60 s)
+
+**O que mostrar:** execução completa com todos os requests verdes.
+
+Passo a passo:
+1. Clique com o botão direito na collection → **Run collection**.
+2. Confirme que o environment **Helfy Local** está selecionado e que **todas as 12 requests** estão marcadas.
+3. Clique em **Run Helfy Core API — Sprint 4**.
+4. Aguarde a execução e mostre o painel de resultado: role devagar pelos 12 requests para que cada um apareça verde.
+5. Ao final, destaque o resumo: **"X requests, 0 failures"** (o número exato de asserções aparece ali).
+
+**O que falar:**
+> "Todas as asserções passaram: nenhum `failed`. O runner encadeou o token JWT gerado no login e o passou automaticamente nos requests seguintes."
+
+**Dica:** se alguma asserção falhar no ensaio, certifique-se de que o ambiente está limpo (`docker compose down -v && docker compose up -d --build`) antes de gravar.
+
+---
+
+### Cena 5 — Execução via CLI com Newman (≈ 30 s)
+
+**O que mostrar:** terminal rodando o newman e o resumo final.
+
+```bash
+npx --yes newman run tests/postman/helfy.postman_collection.json \
+  -e tests/postman/helfy.postman_environment.json
+```
+
+Deixe o output rolar até aparecer o bloco de resumo. Certifique-se de que a linha **`failed  │  0`** fique visível na tela.
+
+**O que falar:**
+> "O mesmo fluxo roda pela linha de comando com Newman — útil para integrar em pipelines de CI. O resultado `failed = 0` confirma que todos os casos passaram."
+
+---
+
+### Cena 6 — Fecho (≈ 10 s)
+
+**O que mostrar:** pode voltar ao Postman com o resultado verde ou mostrar o repositório.
+
+**O que falar:**
+> "A suite cobre o fluxo completo: registro, login, configuração de perfil, cadastro de alimento, adição e remoção da dispensa, cálculo de score nutricional personalizado e sugestão de receitas. Obrigado."
+
+---
+
+### Checklist antes de publicar
+
+- [ ] Áudio claro, sem eco ou ruído de fundo excessivo.
+- [ ] Todos os 12 requests aparecem verdes na gravação.
+- [ ] A linha `failed = 0` do Newman está visível.
+- [ ] Nenhuma informação sensível (senhas reais, tokens de produção) aparece na tela.
+- [ ] Duração total: entre 3 e 4 minutos.
