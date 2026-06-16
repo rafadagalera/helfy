@@ -2,6 +2,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from core_api.auth.deps import get_current_user, require_owner
@@ -26,12 +27,18 @@ def _resolve_food(body: PantryAddIn, db: Session) -> Food:
     try:
         normalized = fetch_product(body.codigo_barras)
     except OffUnavailableError:
-        raise HTTPException(status_code=502, detail="Base de produtos externa indisponível")
+        raise HTTPException(status_code=502, detail="Base de produtos externa indisponível; tente o input manual")
     if normalized is None:
         raise HTTPException(status_code=404, detail="Produto não encontrado na base externa")
     food = Food(**normalized)
     db.add(food)
-    db.flush()
+    try:
+        db.flush()
+    except IntegrityError:
+        db.rollback()
+        food = db.scalar(select(Food).where(Food.barcode == body.codigo_barras))
+        if food is None:
+            raise HTTPException(status_code=502, detail="Erro ao persistir produto")
     return food
 
 

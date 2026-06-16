@@ -1,3 +1,4 @@
+import httpx
 import respx
 from httpx import Response
 
@@ -65,7 +66,7 @@ def test_suggestions_are_deterministic(client, db):
 
 @respx.mock
 def test_engine_down_degrades_to_coverage_order(client, db):
-    respx.post(ENGINE_URL).mock(side_effect=Exception("down"))
+    respx.post(ENGINE_URL).mock(side_effect=httpx.ConnectError("down"))
     headers, user_id = _setup(client, db)
 
     resp = client.get(f"/receitas/sugeridas/{user_id}", headers=headers)

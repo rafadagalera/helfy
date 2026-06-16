@@ -1,0 +1,13 @@
+Work Item Type,Title,Tags
+User Story,TC-01 Registro de novo usuario,Auth
+User Story,TC-02 Registro com email existente,Auth
+User Story,TC-03 Login com credenciais validas,Auth
+User Story,TC-04 Login com senha incorreta,Auth
+User Story,TC-05 Completar perfil onboarding,Perfil
+User Story,TC-06 Perfil com peso invalido,Perfil
+User Story,TC-07 Adicionar alimento por barcode,Dispensa
+User Story,TC-08 Adicionar alimento manual,Dispensa
+User Story,TC-09 Remover alimento da dispensa,Dispensa
+User Story,TC-10 Ver score e justificativa,Score
+User Story,TC-11 Ver receitas sugeridas,Receitas
+User Story,TC-12 Receitas sem perfil,Receitas

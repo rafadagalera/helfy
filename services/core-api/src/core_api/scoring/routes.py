@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from core_api.auth.deps import get_current_user, require_owner
 from core_api.db.models import Food, Profile, User
 from core_api.db.session import get_db
-from core_api.scoring.engine_client import EngineUnavailableError
+from core_api.scoring.engine_client import EngineContractError, EngineUnavailableError
 from core_api.scoring.schemas import ScoreOut, ScoreRequest
 from core_api.scoring.service import get_scores, justification_from_breakdown
 
@@ -40,6 +40,9 @@ def score(body: ScoreRequest, user: User = Depends(get_current_user),
         scores = get_scores(db, profile, foods)
     except EngineUnavailableError:
         raise HTTPException(status_code=503, detail="Engine de score indisponível")
+    except EngineContractError:
+        raise HTTPException(status_code=500,
+                            detail="Erro de contrato com a engine de score")
 
     return [ScoreOut(alimento_id=str(f.id), score=scores[str(f.id)]["score"],
                      justificativa=justification_from_breakdown(scores[str(f.id)]["breakdown"]))

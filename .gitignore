@@ -23,3 +23,6 @@ services/score-engine/data/processed/
 # IDE
 .idea/
 .vscode/
+
+# Contexto de agentes AI (arquivo local, não deve ir ao repositório)
+CLAUDE.md

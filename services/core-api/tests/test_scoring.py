@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime, timedelta, timezone
 
+import httpx
 import respx
 from httpx import Response
 
@@ -72,10 +73,21 @@ def test_expired_cache_entry_is_recomputed(client, db):
 @respx.mock
 def test_engine_down_returns_503(client, db):
     headers, user_id, food_id = _setup_user_with_food(client, db)
-    respx.post(ENGINE_URL).mock(side_effect=Exception("connection refused"))
+    respx.post(ENGINE_URL).mock(side_effect=httpx.ConnectError("connection refused"))
     resp = client.post("/score", headers=headers,
                        json={"usuario_id": user_id, "alimento_ids": [food_id]})
     assert resp.status_code == 503
+
+
+@respx.mock
+def test_engine_contract_error_returns_500_not_503(client, db):
+    # 4xx da engine é bug de contrato, não instabilidade — não mascarar como 503
+    headers, user_id, food_id = _setup_user_with_food(client, db)
+    respx.post(ENGINE_URL).mock(
+        return_value=Response(422, json={"detail": "validation error"}))
+    resp = client.post("/score", headers=headers,
+                       json={"usuario_id": user_id, "alimento_ids": [food_id]})
+    assert resp.status_code == 500
 
 
 def test_score_requires_profile(client, db):

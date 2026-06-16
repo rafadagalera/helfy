@@ -59,9 +59,28 @@ def test_barcode_not_found_in_off_404(client):
 @respx.mock
 def test_off_unavailable_502(client):
     headers, _ = auth_headers(client)
+    import httpx as _httpx
     respx.get(f"{settings.off_base_url}/api/v2/product/111.json").mock(
-        side_effect=Exception("timeout"))
+        side_effect=_httpx.ConnectError("timeout"))
     assert client.get("/alimentos/barcode/111", headers=headers).status_code == 502
+
+
+def test_normalize_off_product_ignores_fish_allergen():
+    # alergia a peixe ≠ crustáceos — en:fish não deve virar "shellfish"
+    product = {**OFF_PRODUCT["product"], "allergens_tags": ["en:fish", "en:crustaceans"]}
+    food = normalize_off_product("123", product)
+    assert food["allergen_flags"] == ["shellfish"]
+
+
+def test_manual_food_rejects_unknown_flags(client):
+    # valores fora do vocabulário da engine causariam 422 lá — barrar na entrada
+    headers, _ = auth_headers(client)
+    resp = client.post("/alimentos", headers=headers,
+                       json={"name": "Granola", "flags": ["organic"]})
+    assert resp.status_code == 422
+    resp = client.post("/alimentos", headers=headers,
+                       json={"name": "Granola", "allergen_flags": ["fish"]})
+    assert resp.status_code == 422
 
 
 def test_manual_food_creation_and_get(client):

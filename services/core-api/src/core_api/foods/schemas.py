@@ -1,7 +1,14 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 NUTRITION_KEYS_DOC = ("energy_kcal_100g, proteins_100g, carbohydrates_100g, fat_100g, "
                       "saturated_fat_100g, fiber_100g, sodium_mg_100g, sugar_100g")
+
+# Vocabulários aceitos pela score-engine (FoodIn) — valores fora disso fariam a
+# engine responder 422 em todo lote que contenha o alimento
+AllergenFlag = Literal["gluten", "lactose", "nuts", "shellfish", "eggs", "soy"]
+FoodFlag = Literal["animal_product", "meat", "fish"]
 
 
 class FoodManualIn(BaseModel):
@@ -14,10 +21,10 @@ class FoodManualIn(BaseModel):
     nutrition: dict[str, float] = Field(
         default_factory=dict,
         description=f"Info nutricional por 100g. Chaves canônicas: {NUTRITION_KEYS_DOC}")
-    allergen_flags: list[str] = Field(
+    allergen_flags: list[AllergenFlag] = Field(
         default=[],
         description="Alérgenos presentes (gluten, lactose, nuts, shellfish, eggs, soy)")
-    flags: list[str] = Field(
+    flags: list[FoodFlag] = Field(
         default=[],
         description="Flags adicionais: animal_product, meat, fish")
 
