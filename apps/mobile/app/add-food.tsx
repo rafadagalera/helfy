@@ -76,7 +76,7 @@ function CameraTab({
       facing="back"
       onBarcodeScanned={scanned ? undefined : ({ data }) => {
         setScanned(true);
-        addToP.mutate({ barcode: data }, { onSuccess: onDone });
+        addToP.mutate({ codigo_barras: data }, { onSuccess: onDone });
       }}
     />
   );
@@ -100,7 +100,7 @@ function ManualTab({
       { name: name.trim() },
       {
         onSuccess: (food) => {
-          addToP.mutate({ food_id: food.id }, { onSuccess: onDone });
+          addToP.mutate({ alimento_id: food.id }, { onSuccess: onDone });
         },
       },
     );

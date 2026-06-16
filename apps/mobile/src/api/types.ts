@@ -37,10 +37,10 @@ export type FoodOut = {
 };
 export type FoodManualIn = {
   name: string;
-  food_group: string;
-  nutrition: Record<string, number>;
-  allergen_flags: Allergen[];
-  flags: ("animal_product" | "meat" | "fish")[];
+  food_group?: string;
+  nutrition?: Record<string, number>;
+  allergen_flags?: Allergen[];
+  flags?: ("animal_product" | "meat" | "fish")[];
 };
 
 export type PantryAddIn = {
